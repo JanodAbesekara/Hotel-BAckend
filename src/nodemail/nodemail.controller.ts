@@ -28,6 +28,8 @@ export class NodemailController {
     };
 
     // Map sendEmailDto to the expected format
+
+
     const mailOptions = {
       to: DTO.recipients[0].address,  // Assuming one recipient
       subject: DTO.subject,

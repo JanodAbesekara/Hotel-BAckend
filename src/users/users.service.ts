@@ -11,6 +11,8 @@ import { UserlogDto } from "./dto/Userlog.dto";
 import { JwtService } from "@nestjs/jwt";
 import { Request, Response } from "express";
 import { NodemailService } from "../nodemail/nodemail.service"; // Import NodemailService
+import { ForgotPasswordDto } from "./dto/forget.dto";
+import { ResetPasswordDto } from "./dto/resetpass.dto";
 
 @Injectable()
 export class UsersService {
@@ -155,7 +157,7 @@ export class UsersService {
         throw new BadRequestException("Invalid token or user does not exist.");
       }
 
-      if (user.verified) {
+      if (user.verified === true) {
         throw new BadRequestException("User is already verified.");
       }
 
@@ -166,6 +168,64 @@ export class UsersService {
       });
 
       return { message: "Email verified successfully." };
+    } catch (error) {
+      throw new BadRequestException("Invalid or expired token.");
+    }
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto) {
+    const user = await this.prisma.uSer.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (!user) {
+      throw new BadRequestException("User with this email does not exist");
+    }
+
+    // Generate a reset token
+    const resetToken = this.jwt.sign(
+      { email: user.email },
+      { secret: process.env.JWT_SECRET, expiresIn: "1h" }
+    );
+
+    // Create a reset password link
+    const resetLink = `http://localhost:3000/auth/reset-password?token=${resetToken}`;
+
+    // Send reset password email
+    await this.nodemailService.sendMail({
+      to: user.email,
+      subject: "Password Reset Request",
+      html: `<p>You requested a password reset. Click <a href="${resetLink}">here</a> to reset your password. This link will expire in 1 hour.</p>`,
+    });
+
+    return { message: "Password reset link sent to your email" };
+  }
+
+  async resetPassword(dto: ResetPasswordDto) {
+    try {
+      // Verify the token
+      const decoded = this.jwt.verify(dto.token, {
+        secret: process.env.JWT_SECRET,
+      });
+      const { email } = decoded;
+
+      // Find user by email
+      const user = await this.prisma.uSer.findUnique({ where: { email } });
+
+      if (!user) {
+        throw new BadRequestException("Invalid token or user does not exist.");
+      }
+
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
+
+      // Update the user's password
+      await this.prisma.uSer.update({
+        where: { email },
+        data: { hashpassword: hashedPassword },
+      });
+
+      return { message: "Password reset successfully" };
     } catch (error) {
       throw new BadRequestException("Invalid or expired token.");
     }
