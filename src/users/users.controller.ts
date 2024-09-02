@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Query,
   Post,
   Req,
   Res,
@@ -24,7 +25,7 @@ export class UsersController {
     return this.usersService.signup(dto);
   }
 
-  @Post("signin")
+  @Post("signin") 
   signin(@Body() dto: UserlogDto, @Req() req, @Res() res) {
     return this.usersService.signin(dto, req, res);
   }
@@ -33,6 +34,13 @@ export class UsersController {
   signout(@Req() req, @Res() res) {
     return this.usersService.signout(req, res);
   }
+
+I 
+  @Get("verify-email")
+  verifyEmail(@Query("token") token: string) {
+    return this.usersService.verifyEmail(token);
+  }
+
 
   @Post('forgot-password')
   async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {

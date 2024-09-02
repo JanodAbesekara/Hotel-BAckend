@@ -59,9 +59,9 @@ export class UsersService {
 
     // Create a verification token
     const token = await this.createtoken({ email: newUser.email });
-    const link = `http://localhost:3000/auth/verify?token=${token}`;
+    const link = `http://localhost:3000/verify?token=${token}`;
 
-    // Send verification email
+    // Send verification emailHow many millions
     await this.sendConformEmail(newUser.email, link);
 
     return {
@@ -103,15 +103,18 @@ export class UsersService {
     if (!token) {
       throw new ForbiddenException();
     }
-
     // Set token as a cookie in the response
-    res.cookie("token", token);
-    return res.send({ message: "Signin success" });
+    // res.cookie("token", token);
+    // return res.send({ message: "Signin success" });
+
+    // Send the token as a response
+    return res.send({ token });
   }
 
   async signout(req: Request, res: Response) {
     // Clear the authentication token
-    res.clearCookie("token");
+    // res.clearCookie("token");
+
     return res.send({ message: "Signout success" });
   }
 
@@ -189,7 +192,7 @@ export class UsersService {
     );
 
     // Create a reset password link
-    const resetLink = `http://localhost:3000/auth/reset-password?token=${resetToken}`;
+    const resetLink = `http://localhost:3000/reset-password?token=${resetToken}`;
 
     // Send reset password email
     await this.nodemailService.sendMail({
