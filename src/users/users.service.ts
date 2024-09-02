@@ -57,6 +57,8 @@ export class UsersService {
       },
     });
 
+   
+
     // Create a verification token
     const token = await this.createtoken({ email: newUser.email });
     const link = `http://localhost:3000/verify?token=${token}`;

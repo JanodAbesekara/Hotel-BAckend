@@ -12,7 +12,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       useFactory: async (configService: ConfigService) => ({
         transport: {
           host: 'smtp.gmail.com',
-          port: 587,
+          port: 465,
           auth: {
             user: configService.get<string>('SENDeMAIL'), // Use ConfigService to get environment variables
             pass: configService.get<string>('SENDMAILPASSWORD'),

@@ -8,6 +8,7 @@ export class NodemailController {
 
   @Post("/sendEmail")
   async sendEmail(@Body() body: Record<string, string>) {
+    console.log("Sending email with body:", body);
     const { fromName, fromAddress, recipientName, recipientAddress } = body;
 
     // Build the DTO for sending the email
