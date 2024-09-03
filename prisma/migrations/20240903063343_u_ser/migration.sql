@@ -3,6 +3,7 @@ CREATE TABLE "USer" (
     "id" SERIAL NOT NULL,
     "firstname" TEXT NOT NULL,
     "lastname" TEXT NOT NULL,
+    "Role" TEXT NOT NULL DEFAULT 'User',
     "PhoneNumber" TEXT NOT NULL,
     "verified" BOOLEAN NOT NULL DEFAULT false,
     "email" TEXT NOT NULL,

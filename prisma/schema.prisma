@@ -11,10 +11,22 @@ model USer {
   id           Int      @id @default(autoincrement())
   firstname    String
   lastname     String
+  Role         String   @default("User")
   PhoneNumber  String   @unique
   verified     Boolean  @default(false)
   email        String   @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   hashpassword String
+}
+
+model Userdetals {
+  id          Int      @id @default(autoincrement())
+  ProfileLink String
+  country     String
+  email       String
+  Province    String
+  address     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
