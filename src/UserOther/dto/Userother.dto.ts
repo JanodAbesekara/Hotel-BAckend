@@ -7,7 +7,7 @@ export class UserotherDto {
 
   @IsNotEmpty()
   @IsString()
-  public country: String;
+  public country: string; 
 
   @IsNotEmpty()
   @IsString()
@@ -19,5 +19,5 @@ export class UserotherDto {
 
   @IsNotEmpty()
   @IsString()
-  public address: String;
+  public address: string; 
 }

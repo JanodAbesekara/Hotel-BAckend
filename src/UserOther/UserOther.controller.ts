@@ -1,22 +1,18 @@
 import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    Query,
-    Post,
-    Req,
-    Res,
-    UseGuards,
-  } from "@nestjs/common";
-  import { UserotherDto } from "./dto/Userother.dto";
-  import { UserOtherService } from "./UserOther.service";
-  
-  @Controller("UserOther")
-  export class UserOtherController{
-     UserOtherService: any;
-     @Post("Filldetails")
-     adddetails(@Body() dto: UserotherDto) {
-       return this.UserOtherService.adddetails(dto);
-     }
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
+import { UserotherDto } from "./dto/Userother.dto";
+import { UserOtherService } from "./UserOther.service";
+
+@Controller("userother")
+export class UserOtherController {
+  constructor(private readonly userOtherService: UserOtherService) {}
+
+  @Post("adddetails")
+  adddetails(@Body() dto: UserotherDto) {
+    return this.userOtherService.adddetails(dto);
   }
+}
