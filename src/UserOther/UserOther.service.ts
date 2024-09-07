@@ -1,30 +1,68 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-} from "@nestjs/common";
+import { Injectable, BadRequestException } from "@nestjs/common";
+import { PrismaService } from "prisma/prisma.service"; // Assuming you're using PrismaService
 import { UserotherDto } from "./dto/Userother.dto";
-import { PrismaService } from "../../prisma/prisma.service";
-import { Prisma, Userdetals } from "@prisma/client";
 
 @Injectable()
 export class UserOtherService {
-  Prisma: any;
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private prisma: PrismaService) {}
 
   async adddetails(dto: UserotherDto) {
-    const { ProfileLink, country, address, email,Province } = dto;
+    const { userId, profileImage, country, province, address } = dto as {
+      userId: number;
+      profileImage: string;
+      country: string;
+      province: string;
+      address: string;
+    };
 
-    const newuserother = await this.prismaService.Userdetals.create({
+    // Now proceed with creating the profile since the user exists
+    const createnewuser = await this.prisma.profile.create({
       data: {
-        ProfileLink,
+        profileImage,
         country,
+        province,
         address,
-        email,
-        Province,
+        userId,
       },
     });
 
-    return { message: "Details added successfully", newuserother };
+    return { message: "Profile created successfully" };
+  }
+
+  async getdetails(userId: number) {
+    const userDetails = await this.prisma.uSer.findUnique({
+      where: { id: userId },
+      include: {
+        profile: true, // Include related data, such as profile, if necessary
+      },
+    });
+
+    if (!userDetails) {
+      throw new Error("User not found");
+    }
+
+    return userDetails;
+  }
+
+  async updatedetails(userId: number, dto: UserotherDto) {
+    const { profileImage, country, province, address } = dto as {
+      profileImage: string;
+      country: string;
+      province: string;
+      address: string;
+    };
+
+    // Update the user's profile
+    const updateProfile = await this.prisma.profile.update({
+      where: { userId },
+      data: {
+        profileImage,
+        country,
+        province,
+        address,
+      },
+    });
+
+    return { message: "Profile updated successfully" };
   }
 }

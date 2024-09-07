@@ -57,8 +57,6 @@ export class UsersService {
       },
     });
 
-   
-
     // Create a verification token
     const token = await this.createtoken({ email: newUser.email });
     const link = `http://localhost:3000/verify?token=${token}`;
@@ -100,6 +98,7 @@ export class UsersService {
       phoneNumber: findUser.PhoneNumber,
       firstname: findUser.firstname,
       lastname: findUser.lastname,
+      password: findUser.hashpassword,
     });
 
     if (!token) {
@@ -131,6 +130,7 @@ export class UsersService {
     phoneNumber: string;
     firstname: string;
     lastname: string;
+    password: string;
   }) {
     return this.jwt.sign(payload, { secret: process.env.JWT_SECRET });
   }

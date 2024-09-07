@@ -1,23 +1,23 @@
-import { IsString, IsNotEmpty, IsOptional, Length } from "class-validator";
+import { IsString, IsNotEmpty, IsOptional, Length ,IsInt} from "class-validator";
 
 export class UserotherDto {
   @IsString()
   @IsNotEmpty()
-  public ProfileLink: string;
+  public profileImage: string;
 
   @IsNotEmpty()
   @IsString()
-  public country: string; 
-
-  @IsNotEmpty()
-  @IsString()
-  public email: string;
+  public country: string;
 
   @IsOptional()
   @IsString()
-  public Province: string;
+  public province: string;
 
   @IsNotEmpty()
   @IsString()
-  public address: string; 
+  public address: string;
+
+  @IsNotEmpty()
+  @IsInt()
+  public userId: number;
 }

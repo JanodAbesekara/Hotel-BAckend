@@ -7,18 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model USer {
-  id           Int      @id @default(autoincrement())
-  firstname    String
-  lastname     String
-  Role         String   @default("User")
-  PhoneNumber  String   @unique
-  verified     Boolean  @default(false)
-  email        String   @unique
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  hashpassword String
-}
+// model USer {
+//   id           Int      @id @default(autoincrement())
+//   firstname    String
+//   lastname     String
+//   Role         String   @default("Customer")
+//   PhoneNumber  String   @unique
+//   verified     Boolean  @default(false)
+//   email        String   @unique
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+//   hashpassword String
+// }
 
 model Userdetals {
   id          Int      @id @default(autoincrement())
@@ -30,3 +30,269 @@ model Userdetals {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model USer {
+  id           Int      @id @default(autoincrement())
+  firstname    String
+  lastname     String
+  email        String   @unique
+  hashpassword String
+  verified     Boolean  @default(false)
+  role         Role     @default(Customer)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  PhoneNumber  String   @unique
+
+  // Relations
+  hotels        Hotel[]             @relation("UserHotels")
+  bookings      Booking[]
+  chats         Chat[]
+  reports       BookingReport[]
+  customerChats Chat[]              @relation("CustomerChats")
+  adminChats    Chat[]              @relation("AdminChats")
+  profile       Profile?
+  notifications AdminNotification[]
+  feedbacks     Feedback[]
+}
+
+enum Role {
+  Admin
+  Customer
+}
+
+model Profile {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique
+  address      String
+  profileImage String?
+  country      String
+  province     String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         USer     @relation(fields: [userId], references: [id])
+}
+
+model Hotel {
+  id          Int             @id @default(autoincrement())
+  adminId     Int
+  name        String
+  location    String
+  description String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  admin       USer            @relation("UserHotels", fields: [adminId], references: [id]) // Corrected relation to User
+  rooms       Room[]
+  reports     BookingReport[]
+  
+}
+
+model Room {
+  id                 Int       @id @default(autoincrement())
+  hotelId            Int
+  roomNumber         String
+  type               String
+  price              Float
+  availabilityStatus Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  hotel              Hotel     @relation(fields: [hotelId], references: [id])
+  bookings           Booking[]
+}
+
+model Booking {
+  id           Int           @id @default(autoincrement())
+  roomId       Int
+  customerId   Int
+  bookingDate  DateTime
+  checkInDate  DateTime
+  checkOutDate DateTime
+  status       BookingStatus
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  room          Room           @relation(fields: [roomId], references: [id])
+  customer      USer           @relation(fields: [customerId], references: [id])
+  feedbacks     Feedback[]
+  notifications Notification[]
+}
+
+enum BookingStatus {
+  Booked
+  Cancelled
+}
+
+model Chat {
+  id         Int      @id @default(autoincrement())
+  adminId    Int
+  customerId Int
+  message    String
+  createdAt  DateTime @default(now())
+  admin      USer     @relation("AdminChats", fields: [adminId], references: [id])
+  customer   USer     @relation("CustomerChats", fields: [customerId], references: [id])
+  User       USer?    @relation(fields: [userId], references: [id])
+  userId     Int?
+}
+
+model BookingReport {
+  id            Int      @id @default(autoincrement())
+  hotelId       Int
+  reportDetails String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  hotel         Hotel    @relation(fields: [hotelId], references: [id])
+  User          USer?    @relation(fields: [userId], references: [id])
+  userId        Int?
+}
+
+model Notification {
+  id                 Int                 @id @default(autoincrement())
+  bookingId          Int
+  message            String
+  createdAt          DateTime            @default(now())
+  // Each admin can mark the notification as viewed
+  adminNotifications AdminNotification[]
+
+  Booking Booking[]
+}
+
+model AdminNotification {
+  id             Int          @id @default(autoincrement())
+  adminId        Int
+  notificationId Int
+  viewed         Boolean      @default(false)
+  notification   Notification @relation(fields: [notificationId], references: [id])
+  admin          USer         @relation(fields: [adminId], references: [id])
+}
+
+model Feedback {
+  id         Int      @id @default(autoincrement())
+  bookingId  Int
+  customerId Int
+  rating     Int // Rating out of 5
+  comment    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  customer USer    @relation(fields: [customerId], references: [id])
+  booking  Booking @relation(fields: [bookingId], references: [id])
+}
+
+// model User {
+//   id        Int      @id @default(autoincrement())
+//   firstname String
+//   lastname  String
+//   email     String   @unique
+//   password  String
+//   role      Role     // Role enum: Admin or Customer
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+
+//   profile   Profile?
+//   hotels    Hotel[]  @relation("UserHotels")
+//   bookings  Booking[]
+//   chats     Chat[]
+//   reports   BookingReport[]
+// }
+
+// enum Role {
+//   Admin
+//   Customer
+// }
+
+// model Profile {
+//   id           Int      @id @default(autoincrement())
+//   userId       Int      @unique
+//   phoneNumber  String   @unique
+//   address      String
+//   profileImage String?
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+
+//   user         User     @relation(fields: [userId], references: [id])
+// }
+// Hotel Model:
+
+// prisma
+// Copy code
+// model Hotel {
+//   id          Int      @id @default(autoincrement())
+//   adminId     Int
+//   name        String
+//   location    String
+//   description String?
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+
+//   admin       User     @relation(fields: [adminId], references: [id])
+//   rooms       Room[]
+//   reports     BookingReport[]
+// }
+// Room Model:
+
+// prisma
+// Copy code
+// model Room {
+//   id                Int      @id @default(autoincrement())
+//   hotelId           Int
+//   roomNumber        String
+//   type              String
+//   price             Float
+//   availabilityStatus Boolean
+//   createdAt         DateTime @default(now())
+//   updatedAt         DateTime @updatedAt
+
+//   hotel             Hotel    @relation(fields: [hotelId], references: [id])
+//   bookings          Booking[]
+// }
+// Booking Model:
+
+// prisma
+// Copy code
+// model Booking {
+//   id           Int      @id @default(autoincrement())
+//   roomId       Int
+//   customerId   Int
+//   bookingDate  DateTime
+//   checkInDate  DateTime
+//   checkOutDate DateTime
+//   status       BookingStatus
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+
+//   room         Room     @relation(fields: [roomId], references: [id])
+//   customer     User     @relation(fields: [customerId], references: [id])
+// }
+
+// enum BookingStatus {
+//   Booked
+//   Cancelled
+// }
+// Chat Model:
+
+// prisma
+// Copy code
+// model Chat {
+//   id         Int      @id @default(autoincrement())
+//   adminId    Int
+//   customerId Int
+//   message    String
+//   createdAt  DateTime @default(now())
+
+//   admin      User     @relation("AdminChats", fields: [adminId], references: [id])
+//   customer   User     @relation("CustomerChats", fields: [customerId], references: [id])
+// }
+// BookingReport Model:
+
+// prisma
+// Copy code
+// model BookingReport {
+//   id           Int      @id @default(autoincrement())
+//   hotelId      Int
+//   adminId      Int
+//   reportDetails String
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+
+//   hotel        Hotel    @relation(fields: [hotelId], references: [id])
+//   admin        User     @relation(fields: [adminId], references: [id])
+// }
