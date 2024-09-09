@@ -99,6 +99,7 @@ export class UsersService {
       firstname: findUser.firstname,
       lastname: findUser.lastname,
       password: findUser.hashpassword,
+      role: findUser.role,
     });
 
     if (!token) {
@@ -131,6 +132,7 @@ export class UsersService {
     firstname: string;
     lastname: string;
     password: string;
+    role: string;
   }) {
     return this.jwt.sign(payload, { secret: process.env.JWT_SECRET });
   }

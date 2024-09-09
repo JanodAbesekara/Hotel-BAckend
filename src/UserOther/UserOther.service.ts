@@ -65,4 +65,12 @@ export class UserOtherService {
 
     return { message: "Profile updated successfully" };
   }
+
+  async deletedetails(userId: number) {
+    const deleteProfile = await this.prisma.profile.delete({
+      where: { userId },
+    });
+
+    return { message: "Profile deleted successfully" };
+  }
 }

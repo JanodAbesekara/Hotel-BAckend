@@ -33,4 +33,10 @@ export class UserOtherController {
     const userID = parseInt(id); 
     return this.userOtherService.updatedetails(userID, dto);
   }
+
+  @Delete('deletedetails')
+  deletedetails(@Query('id') id: string) {
+    const userID = parseInt(id); 
+    return this.userOtherService.deletedetails(userID);
+  }
 }

@@ -62,7 +62,7 @@ enum Role {
 
 model Profile {
   id           Int      @id @default(autoincrement())
-  userId       Int      @unique
+  userId       Int      @unique 
   address      String
   profileImage String?
   country      String
