@@ -9,7 +9,8 @@ import {
   Query,
   Put,
 } from "@nestjs/common";
-import { UserotherDto } from "./dto/Userother.dto";
+import { UserotherDto  } from "./dto/Userother.dto";
+import { HoteluserDto } from "./dto/Hoteluser.dto";
 import { UserOtherService } from "./UserOther.service";
 
 
@@ -39,4 +40,10 @@ export class UserOtherController {
     const userID = parseInt(id); 
     return this.userOtherService.deletedetails(userID);
   }
+
+ @Post('addhotelDetails')
+ adddHoteldetails(@Body() dto: HoteluserDto) {
+   return this.userOtherService.adddHoteldetails(dto);
+ }
+
 }

@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "prisma/prisma.service"; // Assuming you're using PrismaService
 import { UserotherDto } from "./dto/Userother.dto";
+import { HoteluserDto } from "./dto/Hoteluser.dto";
 
 @Injectable()
 export class UserOtherService {
@@ -73,4 +74,22 @@ export class UserOtherService {
 
     return { message: "Profile deleted successfully" };
   }
+
+  async adddHoteldetails(dto: HoteluserDto) {
+    const { adminId, name, location, description } = dto;
+  
+    const createHotel = await this.prisma.hotel.create({
+      data: {
+        name,
+        location,
+        description,
+        admin: {
+          connect: { id: adminId } // Link to existing admin
+        }
+      }
+    });
+  
+    return { createHotel };
+  }
+  
 }
