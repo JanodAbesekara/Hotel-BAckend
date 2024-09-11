@@ -62,6 +62,16 @@ CREATE TABLE "Hotel" (
 );
 
 -- CreateTable
+CREATE TABLE "HotelImage" (
+    "id" SERIAL NOT NULL,
+    "url" TEXT NOT NULL,
+    "caption" TEXT,
+    "hotelId" INTEGER NOT NULL,
+
+    CONSTRAINT "HotelImage_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Room" (
     "id" SERIAL NOT NULL,
     "hotelId" INTEGER NOT NULL,
@@ -173,6 +183,9 @@ ALTER TABLE "Profile" ADD CONSTRAINT "Profile_userId_fkey" FOREIGN KEY ("userId"
 
 -- AddForeignKey
 ALTER TABLE "Hotel" ADD CONSTRAINT "Hotel_adminId_fkey" FOREIGN KEY ("adminId") REFERENCES "USer"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "HotelImage" ADD CONSTRAINT "HotelImage_hotelId_fkey" FOREIGN KEY ("hotelId") REFERENCES "Hotel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Room" ADD CONSTRAINT "Room_hotelId_fkey" FOREIGN KEY ("hotelId") REFERENCES "Hotel"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

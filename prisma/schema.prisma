@@ -62,7 +62,7 @@ enum Role {
 
 model Profile {
   id           Int      @id @default(autoincrement())
-  userId       Int      @unique 
+  userId       Int      @unique
   address      String
   profileImage String?
   country      String
@@ -80,34 +80,19 @@ model Hotel {
   description String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
-  admin       USer            @relation("UserHotels", fields: [adminId], references: [id]) // Corrected relation to User
+  admin       USer            @relation("UserHotels", fields: [adminId], references: [id])
   rooms       Room[]
   reports     BookingReport[]
-  
+  images      HotelImage[] // One-to-many relationship with HotelImages
 }
 
-// model Hotel {
-//   id          Int             @id @default(autoincrement())
-//   adminId     Int
-//   name        String
-//   location    String
-//   description String?
-//   createdAt   DateTime        @default(now())
-//   updatedAt   DateTime        @updatedAt
-//   admin       USer            @relation("UserHotels", fields: [adminId], references: [id])
-//   rooms       Room[]
-//   reports     BookingReport[]
-//   images      HotelImage[]    // One-to-many relationship with HotelImages
-// }
-
-// model HotelImage {
-//   id        Int      @id @default(autoincrement())
-//   url       String   // URL or path to the image
-//   caption   String?  // Optional image caption or description
-//   hotelId   Int
-//   hotel     Hotel    @relation(fields: [hotelId], references: [id])  // Many-to-one relationship with Hotel
-// }
-
+model HotelImage {
+  id      Int     @id @default(autoincrement())
+  url     String // URL or path to the image
+  caption String? // Optional image caption or description
+  hotelId Int
+  hotel   Hotel   @relation(fields: [hotelId], references: [id]) // Many-to-one relationship with Hotel
+}
 
 model Room {
   id                 Int       @id @default(autoincrement())
@@ -199,4 +184,3 @@ model Feedback {
   customer USer    @relation(fields: [customerId], references: [id])
   booking  Booking @relation(fields: [bookingId], references: [id])
 }
-
