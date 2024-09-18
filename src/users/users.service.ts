@@ -5,7 +5,7 @@ import {
 } from "@nestjs/common";
 import { UserDto } from "./dto/user.dto";
 import * as bcrypt from "bcrypt";
-import { Prisma, USer } from "@prisma/client"; // Corrected the import for `User`
+import { Prisma, USer, Role } from "@prisma/client"; // Corrected the import for `User` and added `Role`
 import { PrismaService } from "prisma/prisma.service";
 import { UserlogDto } from "./dto/Userlog.dto";
 import { JwtService } from "@nestjs/jwt";
@@ -13,6 +13,7 @@ import { Request, Response } from "express";
 import { NodemailService } from "../nodemail/nodemail.service"; // Import NodemailService
 import { ForgotPasswordDto } from "./dto/forget.dto";
 import { ResetPasswordDto } from "./dto/resetpass.dto";
+
 
 @Injectable()
 export class UsersService {
@@ -238,5 +239,59 @@ export class UsersService {
     }
   }
 
+  async getadmindata() {
+    // Get all admin users
+    const adminData = await this.prisma.uSer.findMany({
+      where: { role: "Admin" },
+    });
+  
+    // Fetch the profile image for each admin
+    const adminDataWithProfile = await Promise.all(
+      adminData.map(async (admin) => {
+        const adminProfile = await this.prisma.profile.findUnique({
+          where: { userId: admin.id }, // Assuming 'userId' is the foreign key to 'uSer' in the 'profile' model
+          select: { profileImage: true },
+        });
+  
+        return {
+          ...admin,
+          profileImage: adminProfile ? adminProfile.profileImage : null, // Add profileImage if found, otherwise null
+        };
+      })
+    );
+  
+    return adminDataWithProfile;
+  }
+  
 
+  async creteadmin(email: string){
+    const user = await this.prisma.uSer.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new BadRequestException("User with this email does not exist");
+    }
+
+    const admin = await this.prisma.uSer.update({
+      where: { email },
+      data: { role: "Admin" },
+    });
+
+    return { message: "Admin role removed successfully" };
+  }
+
+
+  async deleteadmin(email: string) {
+    const user = await this.prisma.uSer.delete({
+      where: { email },
+    });
+    return {
+      message: "Admin and associated hotels and images removed successfully",
+    };
+  }
+  
+  
 }
+ 
+

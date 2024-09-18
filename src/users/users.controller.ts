@@ -8,12 +8,14 @@ import {
   Req,
   Res,
   UseGuards,
+  Delete,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { UserDto } from "./dto/user.dto";
 import { UserlogDto } from "./dto/Userlog.dto";
 import { ForgotPasswordDto } from "./dto/forget.dto";
 import { ResetPasswordDto } from "./dto/resetpass.dto";
+import { query } from "express";
 
 
 @Controller("users")
@@ -51,6 +53,22 @@ I
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
     return this.usersService.resetPassword(resetPasswordDto);
   }
+
+  @Get('AdminData')
+  getadmindata(){
+    return this.usersService.getadmindata();
+  }
+
+  @Post('CreateAdmin')
+  creteadmin(@Query('email') email:string){
+    return this.usersService.creteadmin(email);
+  }
+
+  @Delete('DeleteAdmin')
+  deleteadmin(@Query('email') email:string){
+    return this.usersService.deleteadmin(email);
+  }
+
 
 }
 function NoAccountGuard(): (target: UsersController, propertyKey: "") => void {
