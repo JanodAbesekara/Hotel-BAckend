@@ -65,8 +65,8 @@ I
   }
 
   @Delete('DeleteAdmin')
-  deleteadmin(@Query('email') email:string){
-    return this.usersService.deleteadmin(email);
+  deleteAdmin(@Query('email') email:string){
+    return this.usersService.deleteAdmin(email);
   }
 
 

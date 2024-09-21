@@ -145,4 +145,7 @@ export class UserOtherService {
 
     return { message: "Image deleted successfully" };
   }
+
+
+  
 }

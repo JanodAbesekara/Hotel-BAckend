@@ -282,14 +282,17 @@ export class UsersService {
   }
 
 
-  async deleteadmin(email: string) {
-    const user = await this.prisma.uSer.delete({
+  async deleteAdmin(email: string) {
+
+   const admindelet =  await this.prisma.uSer.delete({
       where: { email },
     });
+  
     return {
-      message: "Admin and associated hotels and images removed successfully",
+      message: `Admin and associated hotels, rooms, and images removed successfully ${{admindelet}}`,
     };
   }
+  
   
   
 }
