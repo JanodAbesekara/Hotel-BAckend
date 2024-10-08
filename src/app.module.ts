@@ -5,6 +5,7 @@ import { MailerModule } from "@nestjs-modules/mailer";
 import { NotifacitionModule } from "./Notifacition/Notifacition.module";
 import { UserOtherModule } from "./UserOther/UserOther.module";
 import { HotelModule } from "./Hotel/Hotel.module";
+import { FeedbackModule } from "./Feedback/Feedback.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { HotelModule } from "./Hotel/Hotel.module";
     NotifacitionModule,
     UserOtherModule,
     HotelModule,
+    FeedbackModule,
   ],
 })
 export class AppModule {}
