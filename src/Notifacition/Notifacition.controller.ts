@@ -16,7 +16,7 @@ import { NotifacitionDTO } from "./dto/NotifacitionBook.dto";
 export class Notifacitioncontroller {
   constructor(private Notifacitionservice: Notifacitionservice) {}
 
-  @Post("Notifacitonsend")
+  @Post("NotifacitonAdd")
   notifacitionsend(@Body() dto: NotifacitionDTO) {
     return this.Notifacitionservice.Addnotifacitionwhenbook(dto);
   }

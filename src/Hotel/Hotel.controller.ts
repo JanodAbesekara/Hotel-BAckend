@@ -12,6 +12,7 @@ import {
 import { HotelService } from "./Hotel.service";
 import { HotelDto } from "./dto/Hotelroom.dto";
 import { RoomInBookingDto } from "./dto/roominBooking.dto";
+import { GetBookingdataDTO } from "./dto/Getbookingdetail.dto";
 
 @Controller("hotel")
 export class HotelController {
@@ -46,6 +47,11 @@ export class HotelController {
   @Post("BookingRoomsCancel")
   BookingRoomsCancel(@Body() dto: RoomInBookingDto) {
     return this.HotelService.BookingRoomsCancel(dto);
+  }
+
+  @Post("GetBookingID")
+  GetBookingID(@Body() dto: GetBookingdataDTO) {
+    return this.HotelService.GetBookingID(dto);
   }
   
 }

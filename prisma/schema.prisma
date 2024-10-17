@@ -7,19 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// model USer {
-//   id           Int      @id @default(autoincrement())
-//   firstname    String
-//   lastname     String
-//   Role         String   @default("Customer")
-//   PhoneNumber  String   @unique
-//   verified     Boolean  @default(false)
-//   email        String   @unique
-//   createdAt    DateTime @default(now())
-//   updatedAt    DateTime @updatedAt
-//   hashpassword String
-// }
-
 model Userdetals {
   id          Int      @id @default(autoincrement())
   ProfileLink String
@@ -69,7 +56,7 @@ model Profile {
   province     String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  user         USer     @relation(fields: [userId], references: [id])
+  user         USer     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Hotel {
@@ -80,7 +67,7 @@ model Hotel {
   description String?
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
-  admin       USer            @relation("UserHotels", fields: [adminId], references: [id])
+  admin       USer            @relation("UserHotels", fields: [adminId], references: [id], onDelete: Cascade)
   rooms       Room[]
   reports     BookingReport[]
   images      HotelImage[] // One-to-many relationship with HotelImages
@@ -91,7 +78,7 @@ model HotelImage {
   url     String // URL or path to the image
   caption String? // Optional image caption or description
   hotelId Int
-  hotel   Hotel   @relation(fields: [hotelId], references: [id]) // Many-to-one relationship with Hotel
+  hotel   Hotel   @relation(fields: [hotelId], references: [id] , onDelete: Cascade) // Many-to-one relationship with Hotel
 }
 
 model Room {
@@ -103,7 +90,7 @@ model Room {
   availabilityStatus Boolean   @default(true)
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
-  hotel              Hotel     @relation(fields: [hotelId], references: [id])
+  hotel              Hotel     @relation(fields: [hotelId], references: [id] , onDelete: Cascade) // Many-to-one relationship with Hotel
   bookings           Booking[]
 }
 
@@ -118,8 +105,8 @@ model Booking {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  room          Room           @relation(fields: [roomId], references: [id])
-  customer      USer           @relation(fields: [customerId], references: [id])
+  room          Room           @relation(fields: [roomId], references: [id] , onDelete: Cascade)
+  customer      USer           @relation(fields: [customerId], references: [id] , onDelete: Cascade)
   feedbacks     Feedback[]
   notifications Notification[]
 }
@@ -135,9 +122,9 @@ model Chat {
   customerId Int
   message    String
   createdAt  DateTime @default(now())
-  admin      USer     @relation("AdminChats", fields: [adminId], references: [id])
-  customer   USer     @relation("CustomerChats", fields: [customerId], references: [id])
-  User       USer?    @relation(fields: [userId], references: [id])
+  admin      USer     @relation("AdminChats", fields: [adminId], references: [id] , onDelete: Cascade)
+  customer   USer     @relation("CustomerChats", fields: [customerId], references: [id] , onDelete: Cascade)
+  User       USer?    @relation(fields: [userId], references: [id] , onDelete: Cascade)
   userId     Int?
 }
 
@@ -147,8 +134,8 @@ model BookingReport {
   reportDetails String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  hotel         Hotel    @relation(fields: [hotelId], references: [id])
-  User          USer?    @relation(fields: [userId], references: [id])
+  hotel         Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  User          USer?    @relation(fields: [userId], references: [id] , onDelete: Cascade)
   userId        Int?
 }
 
@@ -168,8 +155,8 @@ model AdminNotification {
   adminId        Int
   notificationId Int
   viewed         Boolean      @default(false)
-  notification   Notification @relation(fields: [notificationId], references: [id])
-  admin          USer         @relation(fields: [adminId], references: [id])
+  notification   Notification @relation(fields: [notificationId], references: [id] , onDelete: Cascade)
+  admin          USer         @relation(fields: [adminId], references: [id] , onDelete: Cascade)
 }
 
 model Feedback {
@@ -181,6 +168,6 @@ model Feedback {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  customer USer    @relation(fields: [customerId], references: [id])
-  booking  Booking @relation(fields: [bookingId], references: [id])
+  customer USer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  booking  Booking @relation(fields: [bookingId], references: [id] , onDelete: Cascade)
 }

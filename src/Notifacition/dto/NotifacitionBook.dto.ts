@@ -7,6 +7,6 @@ export class NotifacitionDTO{
     
     @IsOptional()
     @IsString()
-    public message : String;
+    public message  : string;
     
 }

@@ -6,12 +6,16 @@ import {
 } from "@nestjs/websockets";
 import { Socket, Server } from "socket.io";
 
-@WebSocketGateway(8002, {})
+@WebSocketGateway(8002, {
+  cors:{
+    origin:"*",
+  },
+})
 export class NotifacitionReal {
   @WebSocketServer() server: Server;
 
   @SubscribeMessage("newMessage")
-  handleNewMessage(client: Socket, message: any) {
+  handleNewMessage(client: Socket, message: any): void {
     console.log(message);
 
     client.emit("reply", "This is a reply");
