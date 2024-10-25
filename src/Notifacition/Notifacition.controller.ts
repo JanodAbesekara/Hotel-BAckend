@@ -31,4 +31,16 @@ export class Notifacitioncontroller {
     const NotifacitionID = parseInt(id);
     return this.Notifacitionservice.deleteNotifacition(NotifacitionID);
   }
+
+  @Get("getIndividualNotifacition")
+  getIndividualNotifacition(@Query("bookingId") bookingId: string) {
+    const NotifacitionID = parseInt(bookingId);
+    return this.Notifacitionservice.getIndividualNotifacition(NotifacitionID);
+  }
+
+  @Post("GetbookingID")
+  getbookingID(@Query("customerId") customerId: string) {
+    const customerID = parseInt(customerId);
+    return this.Notifacitionservice.getbookingID(customerID);
+  }
 }

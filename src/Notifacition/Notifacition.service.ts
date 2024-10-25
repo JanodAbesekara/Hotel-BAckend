@@ -12,7 +12,7 @@ export class Notifacitionservice {
 
   async Addnotifacitionwhenbook(dto: NotifacitionDTO) {
     try {
-      const { bookingId, message  } = dto;
+      const { bookingId, message } = dto;
       const createNotifaciton = await this.prisma.notification.create({
         data: {
           bookingId,
@@ -54,6 +54,33 @@ export class Notifacitionservice {
     } catch (error) {
       console.error("Error deleting Notifacition", error);
       throw new BadRequestException("Cant delete Notifacition");
+    }
+  }
+
+  async getIndividualNotifacition(bookingId: number) {
+    try {
+      const individualNotifacition = await this.prisma.notification.findMany({
+        where: { bookingId: bookingId },
+      });
+    this.notifacitionReal.server.emit("individualNotification", bookingId);
+      return individualNotifacition;
+    } catch (error) {
+      console.error("Error getting individual Notifacition", error);
+      throw new BadRequestException("Cant get individual Notifacition");
+    }
+  }
+
+  async getbookingID(customerId: number) {
+    try {
+      const bookingID = await this.prisma.booking.findMany({
+        where: { customerId: customerId },
+        select :{ id : true}
+      });
+
+      return bookingID;
+    } catch (error) {
+      console.error("Error getting booking ID", error);
+      throw new BadRequestException("Cant get booking ID");
     }
   }
 }

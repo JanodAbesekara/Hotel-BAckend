@@ -5,4 +5,6 @@ export class NotifacitionAdminDTO{
  
     @IsNotEmpty()
     public  bookingId: number;
+
+
 }
