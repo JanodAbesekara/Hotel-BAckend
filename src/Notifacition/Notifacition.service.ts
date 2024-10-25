@@ -62,7 +62,7 @@ export class Notifacitionservice {
       const individualNotifacition = await this.prisma.notification.findMany({
         where: { bookingId: bookingId },
       });
-    this.notifacitionReal.server.emit("individualNotification", bookingId);
+      this.notifacitionReal.server.emit("individualNotification", bookingId);
       return individualNotifacition;
     } catch (error) {
       console.error("Error getting individual Notifacition", error);
@@ -74,13 +74,36 @@ export class Notifacitionservice {
     try {
       const bookingID = await this.prisma.booking.findMany({
         where: { customerId: customerId },
-        select :{ id : true}
+        select: { id: true },
       });
 
       return bookingID;
     } catch (error) {
       console.error("Error getting booking ID", error);
       throw new BadRequestException("Cant get booking ID");
+    }
+  }
+
+  async getuniqueNotifacition(id: number) {
+    try {
+      const getBookiingid = await this.prisma.booking.findMany({
+        where: { customerId: id },
+        select: { id: true },
+      });
+
+      const uniqueNotifacition = await this.prisma.notification.findMany({
+        where: { bookingId: getBookiingid[0].id },
+      });
+
+      this.notifacitionReal.server.emit(
+        "uniqueNotification",
+        uniqueNotifacition
+      );
+
+      return uniqueNotifacition;
+    } catch (error) {
+      console.error("Error getting unique Notifacition", error);
+      throw new BadRequestException("Cant get unique Notifacition");
     }
   }
 }

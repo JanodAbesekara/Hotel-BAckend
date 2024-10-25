@@ -43,4 +43,11 @@ export class Notifacitioncontroller {
     const customerID = parseInt(customerId);
     return this.Notifacitionservice.getbookingID(customerID);
   }
+
+  @Post("GetbookingUnique")
+  getuniqueNotifacition(@Query("customerId") customerId: string) {
+    const customerID = parseInt(customerId);
+    return this.Notifacitionservice.getuniqueNotifacition(customerID);
+  }
+
 }
