@@ -50,4 +50,9 @@ export class Notifacitioncontroller {
     return this.Notifacitionservice.getuniqueNotifacition(customerID);
   }
 
+  @Get("getallnotifacition")
+  getallnotifacition() {
+    return this.Notifacitionservice.getallnotifacition();
+  }
+
 }

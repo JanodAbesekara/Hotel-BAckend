@@ -43,6 +43,79 @@ export class Notifacitionservice {
     }
   }
 
+  async getallnotifacition() {
+    try {
+      // Retrieve all notifications
+      const notifications = await this.prisma.notification.findMany({
+        select: {
+          id: true,
+          bookingId: true,
+          message: true,
+          createdAt: true,
+        },
+      });
+
+      // Map over notifications to get related data for each notification
+      const detailedNotifications = await Promise.all(
+        notifications.map(async (notification) => {
+          // Get customer details based on bookingId from the notification
+          const customerDetails = await this.prisma.booking.findUnique({
+            where: { id: notification.bookingId },
+            select: {
+              id: true,
+              customerId: true, // Add any other fields needed from booking
+            },
+          });
+
+          // Check if booking exists
+          if (!customerDetails) {
+            return { ...notification, customerDetails: null };
+          }
+
+          // Get room details for each booking
+          const roomDetails = await this.prisma.room.findUnique({
+            where: { id: customerDetails.id },
+            select: {
+              roomNumber: true,
+              type: true,
+              hotelId: true,
+            },
+          });
+
+          // Get hotel details based on room details
+          const hotelDetails = roomDetails
+            ? await this.prisma.hotel.findUnique({
+                where: { id: roomDetails.hotelId },
+                select: {
+                  name: true,
+                  location: true,
+                },
+              })
+            : null;
+
+          // Return structured data for each notification
+          return {
+            notification,
+            customerDetails,
+            roomDetails,
+            hotelDetails,
+          };
+        })
+      );
+
+      // Emit all notifications to clients via WebSocket
+      this.notifacitionReal.server.emit(
+        "allNotifications",
+        detailedNotifications
+      );
+
+      return detailedNotifications;
+    } catch (error) {
+      console.error("Error getting all notifications", error);
+      throw new BadRequestException("Cannot get all notifications");
+    }
+  }
+
   async deleteNotifacition(id: number) {
     try {
       await this.prisma.notification.delete({
@@ -84,26 +157,105 @@ export class Notifacitionservice {
     }
   }
 
+  // async getuniqueNotifacition(id: number) {
+  //   try {
+  //     const getBookiingid = await this.prisma.booking.findMany({
+  //       where: { customerId: id },
+  //       select: { id: true },
+  //     });
+
+  //     const uniqueNotifacition = await this.prisma.notification.findMany({
+  //       where: { bookingId: getBookiingid[0].id },
+  //     });
+
+  //     this.notifacitionReal.server.emit(
+  //       "uniqueNotification",
+  //       uniqueNotifacition
+  //     );
+
+  //     return uniqueNotifacition;
+  //   } catch (error) {
+  //     console.error("Error getting unique Notifacition", error);
+  //     throw new BadRequestException("Cant get unique Notifacition");
+  //   }
+  // }
+
   async getuniqueNotifacition(id: number) {
     try {
-      const getBookiingid = await this.prisma.booking.findMany({
-        where: { customerId: id },
+      // Retrieve booking IDs for the specified customer
+      const bookings = await this.prisma.booking.findMany({
+        where: { customerId: id, status: "Booked" },
         select: { id: true },
       });
 
-      const uniqueNotifacition = await this.prisma.notification.findMany({
-        where: { bookingId: getBookiingid[0].id },
-      });
+      // Map over bookings to get related notification data
+      const notificationDetails = await Promise.all(
+        bookings.map(async (booking) => {
+          // Fetch the notification for each booking
+          const notification = await this.prisma.notification.findMany({
+            where: { bookingId: booking.id },
+            select: {
+              id: true,
+              bookingId: true,
+              message: true,
+              createdAt: true,
+            },
+          });
 
+          // Fetch customer details
+          const customerDetails = await this.prisma.booking.findUnique({
+            where: { id: booking.id },
+            select: {
+              customerId: true,
+              roomId: true,
+            },
+          });
+
+          // Fetch room details associated with this booking
+          const roomDetails = customerDetails
+            ? await this.prisma.room.findMany({
+                where: {
+                  id: customerDetails.roomId,
+                  availabilityStatus: false,
+                },
+                select: {
+                  roomNumber: true,
+                  type: true,
+                  hotelId: true,
+                },
+              })
+            : null;
+
+          // Check if roomDetails has at least one element before trying to access roomDetails[0].hotelId
+          const hotelDetails =
+            roomDetails && roomDetails.length > 0
+              ? await this.prisma.hotel.findMany({
+                  where: { id: roomDetails[0].hotelId },
+                  select: {
+                    name: true,
+                    location: true,
+                  },
+                })
+              : null;
+
+          return {
+            notification,
+            customerDetails,
+            roomDetails,
+            hotelDetails,
+          };
+        })
+      );
+      // Emit data via WebSocket
       this.notifacitionReal.server.emit(
         "uniqueNotification",
-        uniqueNotifacition
+        notificationDetails
       );
 
-      return uniqueNotifacition;
+      return notificationDetails;
     } catch (error) {
-      console.error("Error getting unique Notifacition", error);
-      throw new BadRequestException("Cant get unique Notifacition");
+      console.error("Error getting unique notifications", error);
+      throw new BadRequestException("Cannot get unique notifications");
     }
   }
 }
