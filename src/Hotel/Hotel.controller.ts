@@ -53,5 +53,11 @@ export class HotelController {
   GetBookingID(@Body() dto: GetBookingdataDTO) {
     return this.HotelService.GetBookingID(dto);
   }
+
+  @Post("RemoveBooking")
+  RemoveBooking(@Query("roomId") roomId: string) {
+    const roomID = parseInt(roomId);
+    return this.HotelService.RemoveBooking(roomID);
+  }
   
 }

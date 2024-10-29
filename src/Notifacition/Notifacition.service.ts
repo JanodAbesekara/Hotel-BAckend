@@ -1,25 +1,35 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import {
+  Injectable,
+  BadRequestException,
+  Inject,
+  forwardRef,
+} from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 import { NotifacitionDTO } from "./dto/NotifacitionBook.dto";
 import { NotifacitionReal } from "./NotifacitionReal";
+import { NotificationGateway } from "./Notification.gateway";
 
 @Injectable()
 export class Notifacitionservice {
   constructor(
-    private prisma: PrismaService,
-    private notifacitionReal: NotifacitionReal
+    private readonly prisma: PrismaService,
+    @Inject(forwardRef(() => NotificationGateway))
+    private readonly notificationGateway: NotificationGateway
   ) {}
 
   async Addnotifacitionwhenbook(dto: NotifacitionDTO) {
     try {
       const { bookingId, message } = dto;
+
+      
+
       const createNotifaciton = await this.prisma.notification.create({
         data: {
           bookingId,
           message,
         },
       });
-      this.notifacitionReal.server.emit("newNotification", {
+      this.notificationGateway.server.emit("newNotification", {
         bookingId,
         message,
       });
@@ -35,11 +45,29 @@ export class Notifacitionservice {
     const sendnotifacition = await this.prisma.notification.findMany();
 
     try {
-      this.notifacitionReal.server.emit("newNotification", sendnotifacition);
+      this.notificationGateway.server.emit("newNotification", sendnotifacition);
       return sendnotifacition;
     } catch (error) {
       console.log("Error send Notifacition", error);
       throw new BadRequestException("Cant send Notifacition");
+    }
+  }
+
+  // cansel button
+
+  async canselnotifacition(dto: NotifacitionDTO) {
+    try {
+      await this.prisma.notification.updateMany({
+        where: {
+          bookingId: dto.bookingId },
+        data: { message: dto.message },
+      });
+
+      this.notificationGateway.server.emit("deleteNotification", dto);
+      return { message: "Notifacition Delete" };
+    } catch (error) {
+      console.error("Error deleting Notifacition", error);
+      throw new BadRequestException("Cant delete Notifacition");
     }
   }
 
@@ -63,6 +91,7 @@ export class Notifacitionservice {
             where: { id: notification.bookingId },
             select: {
               id: true,
+              roomId: true,
               customerId: true, // Add any other fields needed from booking
             },
           });
@@ -74,11 +103,12 @@ export class Notifacitionservice {
 
           // Get room details for each booking
           const roomDetails = await this.prisma.room.findUnique({
-            where: { id: customerDetails.id },
+            where: { id: customerDetails.roomId },
             select: {
               roomNumber: true,
               type: true,
               hotelId: true,
+              id: true,
             },
           });
 
@@ -104,7 +134,7 @@ export class Notifacitionservice {
       );
 
       // Emit all notifications to clients via WebSocket
-      this.notifacitionReal.server.emit(
+      this.notificationGateway.server.emit(
         "allNotifications",
         detailedNotifications
       );
@@ -122,7 +152,7 @@ export class Notifacitionservice {
         where: { id },
       });
 
-      this.notifacitionReal.server.emit("deleteNotification", id);
+      this.notificationGateway.server.emit("deleteNotification", id);
       return { message: "Notifacition Delete" };
     } catch (error) {
       console.error("Error deleting Notifacition", error);
@@ -135,7 +165,7 @@ export class Notifacitionservice {
       const individualNotifacition = await this.prisma.notification.findMany({
         where: { bookingId: bookingId },
       });
-      this.notifacitionReal.server.emit("individualNotification", bookingId);
+      this.notificationGateway.server.emit("individualNotification", bookingId);
       return individualNotifacition;
     } catch (error) {
       console.error("Error getting individual Notifacition", error);
@@ -247,7 +277,7 @@ export class Notifacitionservice {
         })
       );
       // Emit data via WebSocket
-      this.notifacitionReal.server.emit(
+      this.notificationGateway.server.emit(
         "uniqueNotification",
         notificationDetails
       );

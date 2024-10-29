@@ -147,6 +147,22 @@ export class HotelService {
         });
       }
 
+      if(parsedCheckInDate.getTime() < Date.now() || parsedCheckOutDate.getTime() < Date.now()) {
+        throw new BadRequestException("Invalid check-in or check-out date");
+      }
+
+      if(parsedCheckOutDate.getTime() < Date.now()) {
+        await this.prisma.room.update({
+          where: { id: roomId },
+          data: { availabilityStatus: true },
+        });
+
+        await this.prisma.booking.update({
+          where: { id: booking.id },
+          data: { status: "Cancelled" },
+        });
+      }
+
       return { message: "Room booking updated successfully", booking };
     } catch (error) {
       console.error("Error booking room:", error);
@@ -215,4 +231,42 @@ export class HotelService {
       throw new BadRequestException("Could not get booking details");
     }
   }
+
+
+
+  async RemoveBooking(roomID: number) {
+    try{
+
+
+      const roomExists = await this.prisma.room.findUnique({ where: { id: roomID } });
+      if (!roomExists) {
+        throw new BadRequestException("Room not found");
+      }
+
+      const bookingExists = await this.prisma.booking.findFirst({ where: { roomId: roomID },
+      
+      });
+      if (!bookingExists) {
+        throw new BadRequestException("Booking not found for this room");
+      }
+
+
+       await this.prisma.room.update({
+          where: { id: roomID },
+          data: { availabilityStatus: true },
+        });
+
+       await this.prisma.booking.updateMany({
+          where: { roomId : roomID },
+          data: { status: "Cancelled" },
+        });
+
+        return { message: "Booking removed successfully" };
+
+    }catch(error){
+      console.error("Error removing booking:", error);
+      throw new BadRequestException("Could not remove booking");
+    }
+  }
+
 }
