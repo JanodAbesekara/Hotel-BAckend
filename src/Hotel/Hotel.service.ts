@@ -11,13 +11,15 @@ export class HotelService {
 
   async addRoomdetails(dto: HotelDto) {
     try {
-      const { roomNumber, type, price, hotelId } = dto;
+      const { roomNumber, type, price, hotelId, caption, url } = dto;
       const createroom = await this.prisma.room.create({
         data: {
           roomNumber,
           type,
           price,
           hotelId,
+          caption,
+          url,
         },
       });
 
@@ -29,25 +31,51 @@ export class HotelService {
   }
 
   async getRoomdetails() {
-    // Fetch all room details
-    const roomdetails = await this.prisma.room.findMany();
-
-    // For each room, get the hotel name and append it to the room data
-    const allhoteldata = await Promise.all(
-      roomdetails.map(async (room) => {
-        const hotel = await this.prisma.hotel.findUnique({
-          where: { id: room.hotelId },
+    // Fetch all rooms along with their hotel and image data
+    const roomDetails = await this.prisma.room.findMany({
+      include: {
+        hotel: {
           select: { name: true },
-        });
+        },
+      },
+    });
 
-        return {
-          ...room,
-          hotelname: hotel?.name || "Unknown Hotel", // Provide a default value in case hotel is not found
+    // Group rooms by roomNumber
+    const groupedRooms = roomDetails.reduce((acc, room) => {
+      const hotelName = room.hotel?.name || "Unknown Hotel";
+
+      if (!acc[room.roomNumber]) {
+        // Initialize the room object with hotel data and an array for images
+        acc[room.roomNumber] = {
+          id: room.id,
+          hotelId: room.hotelId,
+          roomNumber: room.roomNumber,
+          type: room.type,
+          price: room.price,
+          availabilityStatus: room.availabilityStatus,
+          createdAt: room.createdAt,
+          updatedAt: room.updatedAt,
+          hotelname: hotelName,
+          images: [
+            {
+              url: room.url,
+              caption: room.caption || "",
+            },
+          ],
         };
-      })
-    );
+      } else {
+        // If already exists, add new image data
+        acc[room.roomNumber].images.push({
+          url: room.url,
+          caption: room.caption || "",
+        });
+      }
 
-    return allhoteldata;
+      return acc;
+    }, {});
+
+    // Convert grouped object to an array of grouped rooms
+    return Object.values(groupedRooms);
   }
 
   async deleteRoom(roomID: number) {
@@ -64,15 +92,55 @@ export class HotelService {
     }
   }
   async roomHoteldetails() {
-    const hotelDetails = await this.prisma.hotel.findMany({
+    // Fetch all hotels along with their rooms
+    const hotels = await this.prisma.hotel.findMany({
       include: {
-        rooms: true, // Include room details
-        images: true, // Include image details
+        rooms: {
+          select: {
+            id: true,
+            hotelId: true,
+            roomNumber: true,
+            type: true,
+            price: true,
+            availabilityStatus: true,
+            createdAt: true,
+            updatedAt: true,
+            url: true,
+            caption: true,
+          },
+        },
       },
     });
-
-    return hotelDetails;
+  
+    // Process each hotel to group rooms by roomNumber and hotelId
+    const formattedHotels = hotels.map((hotel) => {
+      const roomGroups: Record<string, any> = {};
+  
+      hotel.rooms.forEach((room) => {
+        const roomKey = `${room.hotelId}-${room.roomNumber}`;
+  
+        if (!roomGroups[roomKey]) {
+          // If this is the first room with this hotelId and roomNumber, create the entry
+          roomGroups[roomKey] = {
+            ...room,
+            images: [{ url: room.url, caption: room.caption }],
+          };
+        } else {
+          // Otherwise, add the image to the existing entry
+          roomGroups[roomKey].images.push({ url: room.url, caption: room.caption });
+        }
+      });
+  
+      // Return the hotel object with grouped rooms as an array
+      return {
+        ...hotel,
+        rooms: Object.values(roomGroups),
+      };
+    });
+  
+    return formattedHotels;
   }
+  
 
   async BookingRooms(dto: RoomInBookingDto) {
     try {
@@ -147,11 +215,14 @@ export class HotelService {
         });
       }
 
-      if(parsedCheckInDate.getTime() < Date.now() || parsedCheckOutDate.getTime() < Date.now()) {
+      if (
+        parsedCheckInDate.getTime() < Date.now() ||
+        parsedCheckOutDate.getTime() < Date.now()
+      ) {
         throw new BadRequestException("Invalid check-in or check-out date");
       }
 
-      if(parsedCheckOutDate.getTime() < Date.now()) {
+      if (parsedCheckOutDate.getTime() < Date.now()) {
         await this.prisma.room.update({
           where: { id: roomId },
           data: { availabilityStatus: true },
@@ -232,41 +303,36 @@ export class HotelService {
     }
   }
 
-
-
   async RemoveBooking(roomID: number) {
-    try{
-
-
-      const roomExists = await this.prisma.room.findUnique({ where: { id: roomID } });
+    try {
+      const roomExists = await this.prisma.room.findUnique({
+        where: { id: roomID },
+      });
       if (!roomExists) {
         throw new BadRequestException("Room not found");
       }
 
-      const bookingExists = await this.prisma.booking.findFirst({ where: { roomId: roomID },
-      
+      const bookingExists = await this.prisma.booking.findFirst({
+        where: { roomId: roomID },
       });
       if (!bookingExists) {
         throw new BadRequestException("Booking not found for this room");
       }
 
+      await this.prisma.room.update({
+        where: { id: roomID },
+        data: { availabilityStatus: true },
+      });
 
-       await this.prisma.room.update({
-          where: { id: roomID },
-          data: { availabilityStatus: true },
-        });
+      await this.prisma.booking.updateMany({
+        where: { roomId: roomID },
+        data: { status: "Cancelled" },
+      });
 
-       await this.prisma.booking.updateMany({
-          where: { roomId : roomID },
-          data: { status: "Cancelled" },
-        });
-
-        return { message: "Booking removed successfully" };
-
-    }catch(error){
+      return { message: "Booking removed successfully" };
+    } catch (error) {
       console.error("Error removing booking:", error);
       throw new BadRequestException("Could not remove booking");
     }
   }
-
 }

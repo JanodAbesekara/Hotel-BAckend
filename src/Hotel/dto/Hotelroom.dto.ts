@@ -17,4 +17,12 @@ export class HotelDto {
     @IsNotEmpty()
     @IsNumber()
     public price: number;
+
+    @IsOptional()
+    @IsString()
+    public url: string;
+
+    @IsOptional()
+    @IsString()
+    public caption: string;
 }

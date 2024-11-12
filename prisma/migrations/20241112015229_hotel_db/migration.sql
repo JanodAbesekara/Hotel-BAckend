@@ -81,6 +81,8 @@ CREATE TABLE "Room" (
     "availabilityStatus" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "url" TEXT NOT NULL,
+    "caption" TEXT NOT NULL,
 
     CONSTRAINT "Room_pkey" PRIMARY KEY ("id")
 );
@@ -130,6 +132,7 @@ CREATE TABLE "Notification" (
     "bookingId" INTEGER NOT NULL,
     "message" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "viewedBy" INTEGER[],
 
     CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
 );

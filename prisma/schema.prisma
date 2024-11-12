@@ -78,21 +78,25 @@ model HotelImage {
   url     String // URL or path to the image
   caption String? // Optional image caption or description
   hotelId Int
-  hotel   Hotel   @relation(fields: [hotelId], references: [id] , onDelete: Cascade) // Many-to-one relationship with Hotel
+  hotel   Hotel   @relation(fields: [hotelId], references: [id], onDelete: Cascade) // Many-to-one relationship with Hotel
 }
 
 model Room {
-  id                 Int       @id @default(autoincrement())
+  id                 Int         @id @default(autoincrement())
   hotelId            Int
   roomNumber         String
   type               String
   price              Float
-  availabilityStatus Boolean   @default(true)
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  hotel              Hotel     @relation(fields: [hotelId], references: [id] , onDelete: Cascade) // Many-to-one relationship with Hotel
+  availabilityStatus Boolean     @default(true)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  hotel              Hotel       @relation(fields: [hotelId], references: [id], onDelete: Cascade) // Many-to-one relationship with Hotel
   bookings           Booking[]
+  url                String
+  caption            String 
 }
+
+
 
 model Booking {
   id           Int           @id @default(autoincrement())
@@ -105,8 +109,8 @@ model Booking {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
-  room          Room           @relation(fields: [roomId], references: [id] , onDelete: Cascade)
-  customer      USer           @relation(fields: [customerId], references: [id] , onDelete: Cascade)
+  room          Room           @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  customer      USer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
   feedbacks     Feedback[]
   notifications Notification[]
 }
@@ -122,9 +126,9 @@ model Chat {
   customerId Int
   message    String
   createdAt  DateTime @default(now())
-  admin      USer     @relation("AdminChats", fields: [adminId], references: [id] , onDelete: Cascade)
-  customer   USer     @relation("CustomerChats", fields: [customerId], references: [id] , onDelete: Cascade)
-  User       USer?    @relation(fields: [userId], references: [id] , onDelete: Cascade)
+  admin      USer     @relation("AdminChats", fields: [adminId], references: [id], onDelete: Cascade)
+  customer   USer     @relation("CustomerChats", fields: [customerId], references: [id], onDelete: Cascade)
+  User       USer?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     Int?
 }
 
@@ -135,7 +139,7 @@ model BookingReport {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   hotel         Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
-  User          USer?    @relation(fields: [userId], references: [id] , onDelete: Cascade)
+  User          USer?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        Int?
 }
 
@@ -146,8 +150,8 @@ model Notification {
   createdAt          DateTime            @default(now())
   // Each admin can mark the notification as viewed
   adminNotifications AdminNotification[]
-
-  Booking Booking[]
+  viewedBy           Int[]
+  Booking            Booking[]
 }
 
 model AdminNotification {
@@ -155,8 +159,8 @@ model AdminNotification {
   adminId        Int
   notificationId Int
   viewed         Boolean      @default(false)
-  notification   Notification @relation(fields: [notificationId], references: [id] , onDelete: Cascade)
-  admin          USer         @relation(fields: [adminId], references: [id] , onDelete: Cascade)
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  admin          USer         @relation(fields: [adminId], references: [id], onDelete: Cascade)
 }
 
 model Feedback {
@@ -169,5 +173,5 @@ model Feedback {
   updatedAt  DateTime @updatedAt
 
   customer USer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  booking  Booking @relation(fields: [bookingId], references: [id] , onDelete: Cascade)
+  booking  Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }
